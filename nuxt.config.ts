@@ -4,9 +4,6 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss'],
   
-  dir: {
-    pages: 'app',
-  },
   app: {
     head: {
       htmlAttrs: {
