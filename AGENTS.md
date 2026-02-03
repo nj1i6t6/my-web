@@ -11,7 +11,7 @@ chat.mcp.autostart: true
 
 ##  我的角色
 - **自然語言 → 自動 MCP**：Nuxt4/Tailwind/GSAP + **SEO/表單/Cloudflare/RESTful API**
-- **主題**：機械車輛+資訊，儀表板、作品集、聯絡表單
+- **主題**：機械車輛+資訊，個人履歷、作品集、聯絡表單
 - **未來**：RESTful API + FastAPI/PostgreSQL/Docker
 
 ##  **安全/SEO/API 鐵律**

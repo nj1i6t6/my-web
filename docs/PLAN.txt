@@ -1,0 +1,852 @@
+# 蘇柏誠 Simon Su 個人品牌網站重構計畫 v3.7：務實核心版本
+
+**專案狀態**：Nuxt 4 + Tailwind + GSAP 基礎已完成，採用**核心差異化優先**策略
+**核心理念**：保留技術深度與創新功能，同時提升代碼質量
+**目標**：機械工程師的智慧系統作品集 — 不只是網站，而是技術能力的互動證明
+
+---
+
+## 1. 當前專案現況 (v1.0 Already Implemented)
+
+### ✅ 已完成功能
+- **技術棧**：Nuxt 4.3.0 + Tailwind + GSAP 3.12.5
+- **設計系統**：深藍黑背景 (#0b0f19) + 霓虹綠 (#00ff88) 主題
+- **頁面結構**：
+  - `/` (index.vue) → 渲染 Dashboard 組件
+  - `/dashboard` → 完整單頁應用 (Hero/About/Skills/Projects/Experience/Contact 錨點)
+  - `/projects` → 作品集列表頁
+- **API 架構**：RESTful 結構已建立
+  - `server/api/health.get.ts` - 健康檢查
+  - `server/api/projects.get.ts` - 專案列表
+  - `server/api/projects/[id].get.ts` - 單一專案
+  - `server/api/projects/[id].put.ts` - 更新專案
+  - `server/api/projects/[id].delete.ts` - 刪除專案
+  - `server/api/projects/index.post.ts` - 新增專案
+- **SEO 優化**：完整 meta tags + Open Graph + Twitter Cards + Schema.org
+- **安全性**：CSP 標頭 + Cloudflare Turnstile 腳本已引入
+
+### ⚠️ 待改進項目
+- Dashboard 為單一巨型組件 (683 行)，需**適度模組化**（非全面重構）
+- 缺少獨立聯絡表單頁面與 API 處理
+- **缺少核心差異化功能**：Edge Middleware、微型模擬器、Blueprint Loading
+- 無中英雙語支援（Phase 2）
+- 無技術部落格系統（Phase 2）
+
+---
+
+## 2. 核心定位與設計系統 (Brand & Design)
+
+*   **主題**：Mechanical Heritage x Neural Future (精準機械的靈魂與智慧系統)
+*   **視覺語言**：
+    *   **現有配色**：深藍黑 (#0b0f19) + 霓虹綠 (#00ff88) + 高對比綠 (#5aff6f) ✅
+    *   **字體系統**：
+      - 現有：Inter + Noto Sans TC ✅
+      - **新增**：JetBrains Mono（等寬字體，用於技術數據/儀表板/代碼展示）
+    *   **Blueprint 網格美學** (Phase 1 核心)：
+      - 3-5% 透明度的 CAD 工程網格背景
+      - Blueprint Skeleton Loading（網格線先行渲染 + Shimmer 填充）
+      - 金屬拉絲質感邊框
+*   **無障礙**：`prefers-reduced-motion` 支援（GSAP 需配置）
+
+---
+
+## 3. 重構策略：兩階段核心推進
+
+### 【Phase 1】核心差異化 + 基礎優化
+
+**策略**：先做**產品差異化**，再做**代碼質量**
+
+#### 3.1 Week 1-2：智慧系統展示（核心賣點）
+
+** 目標**：證明「我不只會寫代碼，更懂系統設計邏輯」
+
+##### A. Edge Middleware 意圖判定（5 行代碼）
+```typescript
+// server/middleware/intent.ts
+export default defineEventHandler((event) => {
+  const referrer = getHeader(event, 'referer') || ''
+  event.context.intentMode = referrer.includes('linkedin') ? 'hiring' : 'dev'
+})
+```
+- **為什麼立即做**：Cloudflare Pages 免費功能，無需延後
+- **展示價值**：智慧判定用戶意圖（HR vs 開發者），動態調整內容
+
+##### B. 動態 CTA 聯絡頁
+```vue
+<!-- pages/contact.vue -->
+<script setup>
+const event = useRequestEvent()
+const intentMode = event?.context?.intentMode || 'dev'
+const showMode = ref(intentMode)
+
+const toggleMode = () => {
+  showMode.value = showMode.value === 'hiring' ? 'dev' : 'hiring'
+}
+</script>
+
+<template>
+  <div class="min-h-screen blueprint-bg">
+    <TheHeader />
+    
+    <section class="mx-auto max-w-4xl px-4 py-16">
+      <div v-if="showMode === 'hiring'" class="text-center">
+        <h1 class="text-4xl font-bold text-white">歡迎 HR！</h1>
+        <p class="mt-4 text-lg text-white/70">感謝您對我的關注</p>
+        <a 
+          href="/resume.pdf" 
+          class="mt-8 inline-flex items-center gap-2 rounded-full bg-neon-green/20 px-8 py-4 text-lg font-semibold text-neon-green shadow-neon-green transition hover:bg-neon-green/30"
+        >
+          📄 下載完整履歷
+        </a>
+      </div>
+      
+      <div v-else class="text-center">
+        <h1 class="text-4xl font-bold text-white">討論技術合作</h1>
+        <p class="mt-4 text-lg text-white/70">歡迎技術交流與專案合作</p>
+        <a 
+          href="#form" 
+          class="mt-8 inline-flex items-center gap-2 rounded-full bg-neon-green/20 px-8 py-4 text-lg font-semibold text-neon-green shadow-neon-green transition hover:bg-neon-green/30"
+        >
+          💬 立即聯繫
+        </a>
+      </div>
+      
+      <p class="mt-6 text-center text-sm text-white/50">
+        或是... <a href="#" @click.prevent="toggleMode" class="text-neon-green hover:underline">切換模式</a>
+      </p>
+      
+      <!-- 聯絡表單 -->
+      <form id="form" class="mt-16 rounded-3xl border border-white/10 bg-slate-900/60 p-8">
+        <!-- 表單內容 -->
+      </form>
+    </section>
+  </div>
+</template>
+```
+
+##### C. Blueprint Skeleton Loading（品牌識別）
+```css
+/* app/assets/css/blueprint-grid.css */
+.blueprint-bg {
+  background-color: #0b0f19;
+  background-image: 
+    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.blueprint-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.8) 0%,
+    rgba(30, 41, 59, 0.8) 50%,
+    rgba(15, 23, 42, 0.8) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+```
+
+```vue
+<!-- components/common/BlueprintSkeleton.vue -->
+<template>
+  <div class="blueprint-skeleton" :style="{ width, height }">
+    <div class="absolute inset-0 blueprint-bg opacity-50"></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  width?: string
+  height?: string
+}>()
+</script>
+```
+
+##### D. Contact API + Turnstile（基礎功能）
+```typescript
+// server/api/contact.post.ts
+import nodemailer from 'nodemailer'
+
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+  const config = useRuntimeConfig()
+  
+  // 1. Turnstile 驗證
+  const verify = await $fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: {
+      secret: config.turnstileSecretKey,
+      response: body.token
+    }
+  })
+  
+  if (!verify.success) {
+    throw createError({ 
+      statusCode: 400, 
+      message: 'Invalid CAPTCHA' 
+    })
+  }
+  
+  // 2. Rate Limiting（簡易版：記憶體快取）
+  // TODO: 生產環境使用 Redis
+  
+  // 3. 發送郵件
+  const transporter = nodemailer.createTransport({
+    host: config.smtpHost,
+    port: 587,
+    secure: false,
+    auth: {
+      user: config.smtpUser,
+      pass: config.smtpPass
+    }
+  })
+  
+  await transporter.sendMail({
+    from: config.smtpUser,
+    to: config.smtpUser,
+    subject: `Portfolio Contact: ${body.name}`,
+    text: `
+      Name: ${body.name}
+      Email: ${body.email}
+      Message: ${body.message}
+    `
+  })
+  
+  return { success: true, message: '訊息已送出' }
+})
+```
+
+##### E. 關鍵組件拆分（非全面）
+- ✅ `components/layout/TheHeader.vue`（導航列）
+- ✅ `components/home/HeroSection.vue`（首頁 Hero）
+- ✅ `components/dashboard/GaugeButton.vue`（儀表按鈕）
+- ❌ **暫緩**：About/Projects 組件（延後拆分）
+
+---
+
+#### 3.2 ：技術證明（跨領域能力）
+
+**🎯 目標**：證明「機械背景 + 全端能力 = 智慧系統開發者」
+
+##### A. IoT 微型模擬器（核心賣點）
+```vue
+<!-- components/lab/IotSimulator.vue -->
+<template>
+  <div class="rounded-3xl border border-white/10 bg-slate-900/60 p-8">
+    <h3 class="text-2xl font-semibold text-white">智慧農業決策模擬器</h3>
+    <p class="mt-2 text-sm text-white/60">即時環境監測與 AI 建議系統</p>
+    
+    <div class="mt-8 space-y-6">
+      <!-- 溫度控制 -->
+      <div>
+        <label class="flex items-center justify-between text-white/80">
+          <span>🌡️ 溫度</span>
+          <span class="text-2xl font-mono font-bold text-neon-green">{{ temperature }}°C</span>
+        </label>
+        <input 
+          v-model="temperature" 
+          type="range" 
+          min="0" 
+          max="50" 
+          class="mt-2 w-full"
+        />
+      </div>
+      
+      <!-- 濕度控制 -->
+      <div>
+        <label class="flex items-center justify-between text-white/80">
+          <span>💧 濕度</span>
+          <span class="text-2xl font-mono font-bold text-neon-green">{{ humidity }}%</span>
+        </label>
+        <input 
+          v-model="humidity" 
+          type="range" 
+          min="0" 
+          max="100" 
+          class="mt-2 w-full"
+        />
+      </div>
+    </div>
+    
+    <!-- AI 建議輸出 -->
+    <div 
+      class="mt-8 rounded-2xl border-2 p-6 transition-colors"
+      :class="suggestionClass"
+    >
+      <h4 class="flex items-center gap-2 text-lg font-semibold text-white">
+        <span>{{ suggestionIcon }}</span>
+        AI 系統建議
+      </h4>
+      <p class="mt-3 text-white/90">{{ aiSuggestion }}</p>
+    </div>
+    
+    <!-- 技術說明 -->
+    <div class="mt-6 rounded-2xl bg-slate-950/60 p-4">
+      <p class="text-xs text-white/50">
+        💡 技術實現：Vue 3 Composition API + Computed Properties<br>
+        🔮 未來擴展：整合 Gemini AI API 提供真實機器學習建議
+      </p>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+const temperature = ref(25)
+const humidity = ref(60)
+
+interface Suggestion {
+  text: string
+  icon: string
+  class: string
+}
+
+const aiSuggestion = computed(() => {
+  if (temperature.value > 30 && humidity.value > 70) {
+    return '高溫高濕環境：建議立即啟動降溫除濕系統，避免作物病害。預計耗能增加 15%，但可降低 40% 病害風險。'
+  } else if (temperature.value < 15) {
+    return '低溫警告：建議開啟加熱設備，維持作物生長溫度。夜間可搭配保溫被覆蓋，節省能源 25%。'
+  } else if (humidity.value < 40) {
+    return '濕度過低：建議啟動灑水或霧化系統增濕。建議灑水時間：早晨 6-8 點，避免水分快速蒸發。'
+  } else if (temperature.value > 35) {
+    return '極高溫警告：建議啟動遮陽網與強制通風，並增加灑水頻率至每 2 小時一次。'
+  }
+  return '✅ 環境參數正常，當前條件適合作物生長。系統處於節能模式，預計日耗能 < 5 kWh。'
+})
+
+const suggestionIcon = computed(() => {
+  if (temperature.value > 30 && humidity.value > 70) return '⚠️'
+  if (temperature.value < 15) return '🔥'
+  if (humidity.value < 40) return '💧'
+  if (temperature.value > 35) return '🚨'
+  return '✅'
+})
+
+const suggestionClass = computed(() => {
+  if (temperature.value > 30 && humidity.value > 70) return 'border-yellow-500/50 bg-yellow-500/10'
+  if (temperature.value < 15) return 'border-orange-500/50 bg-orange-500/10'
+  if (humidity.value < 40) return 'border-blue-500/50 bg-blue-500/10'
+  if (temperature.value > 35) return 'border-red-500/50 bg-red-500/10'
+  return 'border-neon-green/50 bg-neon-green/10'
+})
+
+// 未來可擴展：呼叫 server/api/simulator/iot.post 取得真實 AI 建議
+// const { data } = await useFetch('/api/simulator/iot', {
+//   method: 'POST',
+//   body: { temperature: temperature.value, humidity: humidity.value }
+// })
+</script>
+```
+
+**展示位置**：
+- `/projects` 頁面嵌入（作為專案案例）
+- 未來可獨立為 `/lab` 頁面
+
+##### B. STAR 框架作品展示
+```vue
+<!-- pages/projects/[id].vue -->
+<template>
+  <div class="min-h-screen blueprint-bg">
+    <TheHeader />
+    
+    <article class="mx-auto max-w-4xl px-4 py-16">
+      <BlueprintSkeleton v-if="pending" width="100%" height="600px" />
+      
+      <div v-else-if="project">
+        <!-- 專案標題 -->
+        <header class="text-center">
+          <h1 class="text-4xl font-bold text-white">{{ project.title }}</h1>
+          <p class="mt-4 text-lg text-white/70">{{ project.subtitle }}</p>
+        </header>
+        
+        <!-- STAR 框架 -->
+        <div class="mt-16 space-y-12">
+          <!-- Situation -->
+          <section class="rounded-3xl border border-white/10 bg-slate-900/60 p-8">
+            <h2 class="flex items-center gap-3 text-2xl font-semibold text-white">
+              <span class="text-3xl">📍</span>
+              Situation (情境背景)
+            </h2>
+            <p class="mt-4 text-white/80">{{ project.situation }}</p>
+          </section>
+          
+          <!-- Task -->
+          <section class="rounded-3xl border border-white/10 bg-slate-900/60 p-8">
+            <h2 class="flex items-center gap-3 text-2xl font-semibold text-white">
+              <span class="text-3xl">🎯</span>
+              Task (技術挑戰)
+            </h2>
+            <p class="mt-4 text-white/80">{{ project.task }}</p>
+          </section>
+          
+          <!-- Action -->
+          <section class="rounded-3xl border border-white/10 bg-slate-900/60 p-8">
+            <h2 class="flex items-center gap-3 text-2xl font-semibold text-white">
+              <span class="text-3xl">⚙️</span>
+              Action (解決方案)
+            </h2>
+            <ul class="mt-4 space-y-3">
+              <li 
+                v-for="(action, index) in project.actions" 
+                :key="index"
+                class="flex gap-3 text-white/80"
+              >
+                <span class="text-neon-green">▸</span>
+                <span>{{ action }}</span>
+              </li>
+            </ul>
+          </section>
+          
+          <!-- Result -->
+          <section class="rounded-3xl border border-white/10 bg-slate-900/60 p-8">
+            <h2 class="flex items-center gap-3 text-2xl font-semibold text-white">
+              <span class="text-3xl">📊</span>
+              Result (量化成果)
+            </h2>
+            <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div 
+                v-for="metric in project.results" 
+                :key="metric.label"
+                class="rounded-2xl border border-neon-green/30 bg-neon-green/10 p-6 text-center"
+              >
+                <div class="text-3xl font-mono font-bold text-neon-green">
+                  {{ metric.value }}
+                </div>
+                <div class="mt-2 text-sm text-white/70">
+                  {{ metric.label }}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        
+        <!-- 返回按鈕 -->
+        <div class="mt-12 text-center">
+          <NuxtLink 
+            to="/projects"
+            class="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-white/80 transition hover:border-neon-green hover:text-neon-green"
+          >
+            ← 返回作品集
+          </NuxtLink>
+        </div>
+      </div>
+    </article>
+  </div>
+</template>
+
+<script setup lang="ts">
+const route = useRoute()
+const { data: project, pending } = await useAsyncData(
+  `project-${route.params.id}`,
+  () => $fetch(`/api/projects/${route.params.id}`)
+)
+
+// SEO
+useSeoMeta({
+  title: project.value?.title || 'Project',
+  description: project.value?.subtitle || ''
+})
+</script>
+```
+
+##### C. Projects API 整合
+```vue
+<!-- pages/projects/index.vue -->
+<template>
+  <div class="min-h-screen blueprint-bg">
+    <TheHeader />
+    
+    <section class="mx-auto max-w-6xl px-4 py-16">
+      <h1 class="text-center text-4xl font-bold text-white">作品集</h1>
+      
+      <div v-if="pending" class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <BlueprintSkeleton v-for="i in 6" :key="i" height="300px" />
+      </div>
+      
+      <div v-else class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <ProjectCard 
+          v-for="project in projects" 
+          :key="project.id" 
+          :project="project" 
+        />
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup lang="ts">
+const { data: projects, pending } = await useAsyncData(
+  'projects',
+  () => $fetch('/api/projects')
+)
+</script>
+```
+
+```vue
+<!-- components/projects/ProjectCard.vue -->
+<template>
+  <NuxtLink 
+    :to="`/projects/${project.id}`"
+    class="group block rounded-3xl border border-white/10 bg-slate-900/60 p-6 transition hover:border-neon-green/50"
+  >
+    <h3 class="text-xl font-semibold text-white group-hover:text-neon-green">
+      {{ project.title }}
+    </h3>
+    <p class="mt-2 text-sm text-white/60">{{ project.subtitle }}</p>
+    
+    <div class="mt-4 flex flex-wrap gap-2">
+      <span 
+        v-for="tag in project.tags" 
+        :key="tag"
+        class="rounded-full bg-neon-green/20 px-3 py-1 text-xs text-neon-green"
+      >
+        {{ tag }}
+      </span>
+    </div>
+  </NuxtLink>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  project: {
+    id: string
+    title: string
+    subtitle: string
+    tags: string[]
+  }
+}>()
+</script>
+```
+
+---
+
+### 【Phase 2】內容擴展與國際化 (Future) ⏳
+
+**時程**：Phase 1 完成後
+
+#### 2.1 技術部落格系統
+- 安裝 `@nuxt/content` v3
+- 建立 `content/blog/` 目錄
+- 實作 MDC (Markdown Components) 互動文章
+- 頁面：`app/pages/blog/[...slug].vue`
+
+#### 2.2 中英雙語支援
+- 安裝 `@nuxtjs/i18n`
+- 路由結構：`/` (中文預設), `/en/` (英文)
+- hreflang 標記 + 語言切換器組件
+
+#### 2.3 進階 Middleware
+```typescript
+// server/middleware/device.ts (裝置偵測)
+export default defineEventHandler((event) => {
+  const ua = getHeader(event, 'user-agent') || ''
+  event.context.isMobile = /mobile|android|iphone/i.test(ua)
+})
+```
+
+#### 2.4 完整組件拆分
+- 拆分 About 區塊（ProfileCard, SkillsTree, ExperienceTimeline）
+- 拆分剩餘 Dashboard 組件
+
+---
+
+## 4. Phase 1 執行檢查清單
+
+### Week 1-2: 智慧系統展示 
+- [ ] 建立 `server/middleware/intent.ts`（Edge 意圖判定）
+- [ ] 新建 `pages/contact.vue`（動態 CTA）
+- [ ] 開發 `server/api/contact.post.ts`（Turnstile + Nodemailer）
+- [ ] 建立 `app/assets/css/blueprint-grid.css`（Blueprint 網格）
+- [ ] 建立 `components/common/BlueprintSkeleton.vue`
+- [ ] 拆分 `components/layout/TheHeader.vue`
+- [ ] 拆分 `components/home/HeroSection.vue`
+- [ ] 拆分 `components/dashboard/GaugeButton.vue`
+- [ ] 安裝 `nodemailer` + 配置 SMTP
+- [ ] 更新 `nuxt.config.ts`（runtimeConfig + cloudflare_pages preset）
+- [ ] 新增 JetBrains Mono 字體引入
+
+### Week 3-4: 技術證明 
+- [ ] 建立 `components/lab/IotSimulator.vue`（核心賣點）
+- [ ] 新建 `pages/projects/[id].vue`（STAR 框架）
+- [ ] 建立 `components/projects/ProjectCard.vue`
+- [ ] 優化 `pages/projects/index.vue`（useAsyncData 整合）
+- [ ] 在 `/projects` 頁面嵌入 IoT 模擬器
+- [ ] 配置 GSAP `prefers-reduced-motion`
+- [ ] Lighthouse 初步優化（目標 90+）
+
+### 環境配置
+- [ ] 建立 `.env.example`（範本文件）：
+  ```bash
+  # Cloudflare Turnstile
+  CLOUDFLARE_TURNSTILE_SECRET_KEY=0x4AAAAAAAxxxxxxxxxx
+  CLOUDFLARE_TURNSTILE_SITEKEY=0x4AAAAAAAyyyyyyyyyy
+  
+  # SMTP 郵件配置
+  SMTP_HOST=smtp.gmail.com
+  SMTP_PORT=587
+  SMTP_USER=your-email@gmail.com
+  SMTP_PASS=your-16-char-app-password
+  
+  # API Base URL（開發環境用 /api，生產環境改為 FastAPI URL）
+  API_BASE_URL=/api
+  ```
+
+- [ ] 建立實際 `.env` 文件（不提交到 Git）：
+  ```bash
+  cp .env.example .env
+  # 然後編輯 .env 填入真實密鑰
+  ```
+
+- [ ] 確保 `.gitignore` 包含：
+  ```
+  .env
+  .env.local
+  ```
+
+---
+
+## 5. 技術實作細節
+
+### 5.1 Nuxt Config 完整配置
+
+```typescript
+// nuxt.config.ts（修改建議）
+export default defineNuxtConfig({
+  compatibilityDate: '2026-02-02',
+  devtools: { enabled: true },
+  modules: ['@nuxtjs/tailwindcss'],
+  
+  runtimeConfig: {
+    // 新增：Server-only（不會暴露到客戶端）
+    turnstileSecretKey: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+    smtpHost: process.env.SMTP_HOST,
+    smtpUser: process.env.SMTP_USER,
+    smtpPass: process.env.SMTP_PASS,
+    
+    public: {
+      // 新增：客戶端可訪問
+      turnstileSiteKey: process.env.CLOUDFLARE_TURNSTILE_SITEKEY,
+      apiBase: process.env.API_BASE_URL || '/api'
+    }
+  },
+  
+  nitro: {
+    preset: 'cloudflare_pages', //新增：啟用 Pages Functions（本地開發時可註解）
+    publicAssets: [
+      { dir: 'Image', baseURL: '/assets' } // ✅ 已存在
+    ],
+    prerender: {
+      crawlLinks: true,
+      routes: ['/', '/dashboard', '/projects', '/contact'] //新增 /contact
+    }
+  },
+  
+  app: {
+    head: {
+      htmlAttrs: { lang: 'zh-TW' },
+      title: '蘇柏誠 Simon Su | 跨域創新開發者作品集 Portfolio',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        //  保留現有完整 CSP 配置（不在此重複列出）
+        //  保留現有所有 meta tags（description, keywords, og, twitter 等）
+      ],
+      link: [
+        //  保留現有所有 link（preconnect, fonts 等）
+        //  新增：JetBrains Mono 字體
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap'
+        }
+      ],
+      script: [
+        //  保留現有 Turnstile 腳本
+        {
+          src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+          async: true,
+          defer: true
+        }
+      ]
+    }
+  }
+})
+```
+
+**修改說明**：
+
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        // ... 現有 CSP 等配置
+      ],
+      link: [
+        // ... 現有配置
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap'
+        }
+      ],
+      script: [
+        {
+          src: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
+          async: true,
+          defer: true
+        }
+      ]
+    }
+  }
+})
+```
+
+### 5.2 Package.json 依賴更新
+
+```json
+{
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "nodemailer": "^6.9.8",
+    "nuxt": "^4.3.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.0",
+    "@types/nodemailer": "^6.4.14"
+  }
+}
+```
+
+---
+
+## 6. 與 AGENTS.md 的完美整合
+
+| agent.md 規範 | v3.7 實作狀態 |
+|--------------|--------------|
+| `server/api/` RESTful | ✅ Projects CRUD 已建立 |
+| `server/api/contact.post` | 🔥 Week  開發 |
+| Turnstile + Rate Limit | 🔥 Week 開發 |
+| `server/middleware/` | 🔥 Week 開發 (intent.ts) |
+| `useSeoMeta` + JSON-LD | ✅ 已配置 |
+| GSAP + Tailwind | ✅ 已整合 |
+| CSP Headers | ✅ 已配置 |
+| 微型模擬器 | 🔥 Week 開發 (核心賣點) |
+| Blueprint 美學 | 🔥 Week 開發 (品牌識別) |
+| i18n 雙語 | ⏳ Phase 2 |
+
+### 自動觸發規則擴充（需加入 AGENTS.md）
+
+將以下規則追加到 `AGENTS.md` 的自動觸發規則區塊：
+
+```markdown
+## v3.7 擴充觸發規則（追加至 AGENTS.md）
+意圖判定/intent/middleware → server/middleware/intent.ts + referer detect + HR/Dev 模式
+動態CTA/contact/智慧判定 → intentMode + 雙模式切換 + toggleMode
+模擬器/simulator/IoT/智慧農業 → components/lab/IotSimulator.vue + computed + GSAP
+藍圖風格/blueprint/skeleton → blueprint-grid.css + BlueprintSkeleton.vue + shimmer
+STAR框架/project/作品展示 → Situation/Task/Action/Result + metrics cards
+儀表板/gauge/dashboard → GaugeButton.vue + GSAP rotate + ScrollTrigger
+聯絡表單/contact/api → server/api/contact.post + Turnstile + nodemailer + rate limit
+專案詳情/projects/[id] → STAR 框架 + useAsyncData + BlueprintSkeleton
+```
+
+**使用範例**：
+- 用戶說「智慧農業模擬器」→ 自動生成 IoT 模擬器組件
+- 用戶說「意圖判定聯絡頁」→ 自動生成 middleware + 動態 CTA
+
+
+---
+
+## 8. 部署檢查清單
+
+### Cloudflare Pages 設定
+- [ ] 連結 GitHub Repository
+- [ ] 環境變數：`CLOUDFLARE_TURNSTILE_SECRET_KEY`
+- [ ] 環境變數：`CLOUDFLARE_TURNSTILE_SITEKEY`
+- [ ] 環境變數：`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`
+- [ ] Build 指令：`npm run generate`
+- [ ] 輸出目錄：`.output/public`
+- [ ] Functions 目錄：`.output/server`（自動處理）
+- [ ] 自訂網域設定
+
+### 效能目標
+- [ ] Lighthouse Performance: 90+ (Phase 1), 95+ (Phase 2)
+- [ ] Lighthouse Accessibility: 100
+- [ ] Lighthouse Best Practices: 100
+- [ ] Lighthouse SEO: 100
+- [ ] Core Web Vitals：LCP < 2.5s, FID < 100ms, CLS < 0.1
+
+### 功能驗證
+- [ ] Edge Middleware 意圖判定正常
+- [ ] 動態 CTA 根據 Referrer 切換
+- [ ] 手動切換模式功能正常
+- [ ] Turnstile 驗證通過
+- [ ] 郵件發送成功（測試 Gmail/Outlook）
+- [ ] IoT 模擬器互動流暢
+- [ ] Blueprint Skeleton 載入流暢
+- [ ] GSAP 動畫效能 60fps
+- [ ] 所有頁面路由正常
+- [ ] 響應式設計完美（Mobile/Tablet/Desktop）
+
+---
+
+## 9. 結語
+
+### v3.7 重構計畫的核心理念
+
+1. **產品差異化優先** → 先做模擬器、Edge Middleware、Blueprint，再做代碼重構
+2. **務實可執行** → 4 週完成核心功能，不延後關鍵創新
+3. **證明技術深度** → 不只是網站，而是「智慧系統設計能力」的互動證明
+
+### 核心賣點總結
+
+| 功能 | 展示能力 |
+|------|---------|---------|
+| Edge Middleware 意圖判定 | 智慧系統設計思維 
+| IoT 微型模擬器 | 機械背景 + 全端能力 
+| Blueprint Skeleton Loading | 工程美學 + 性能優化 
+| STAR 框架專案展示 | 結構化思維 + 量化成果 
+| Dynamic CTA | 用戶體驗設計 + 容錯機制 
+
+**總計**：展示 5 項核心競爭力
+
+---
+
+## 10. 附錄：快速啟動指令
+
+### 安裝依賴
+```bash
+npm install nodemailer
+npm install -D @types/nodemailer
+```
+
+### 建立環境變數
+```bash
+# .env
+CLOUDFLARE_TURNSTILE_SECRET_KEY=0x4AAAAAAAxxxxxxxx
+CLOUDFLARE_TURNSTILE_SITEKEY=0x4AAAAAAAyyyyyyyy
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+```
+
+### 開發伺服器
+```bash
+npm run dev
+```
+
+### 生產構建（Cloudflare Pages）
+```bash
+npm run generate
+```
+
+### Lighthouse 測試
+```bash
+npx lighthouse https://localhost:3000 --view
+```
+
+---
+
+**立即執行：開始 Week 1-2 智慧系統展示開發。**
