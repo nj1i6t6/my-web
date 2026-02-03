@@ -1,0 +1,97 @@
+/* Blueprint 工程網格背景系統 */
+.blueprint-bg {
+  background-color: #0b0f19;
+  background-image: 
+    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 0;
+}
+
+/* Blueprint Skeleton Loading Animation */
+.blueprint-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.8) 0%,
+    rgba(30, 41, 59, 0.8) 50%,
+    rgba(15, 23, 42, 0.8) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes shimmer {
+  0% { 
+    background-position: -200% 0; 
+  }
+  100% { 
+    background-position: 200% 0; 
+  }
+}
+
+/* 金屬拉絲質感邊框 */
+.metal-border {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+}
+
+/* CAD 風格虛線 */
+.cad-dashed {
+  border-style: dashed;
+  border-color: rgba(0, 255, 136, 0.2);
+  border-width: 1px;
+}
+
+/* 技術數據顯示（等寬字體） */
+.tech-data {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 霓虹綠發光效果 */
+.neon-glow {
+  box-shadow: 
+    0 0 10px rgba(0, 255, 136, 0.3),
+    0 0 20px rgba(0, 255, 136, 0.2),
+    0 0 30px rgba(0, 255, 136, 0.1);
+}
+
+/* 懸停時增強發光 */
+.neon-glow-hover {
+  transition: box-shadow 0.3s ease;
+}
+
+.neon-glow-hover:hover {
+  box-shadow: 
+    0 0 15px rgba(0, 255, 136, 0.4),
+    0 0 30px rgba(0, 255, 136, 0.3),
+    0 0 45px rgba(0, 255, 136, 0.2);
+}
+
+/* 無障礙：尊重用戶動畫偏好設定 */
+@media (prefers-reduced-motion: reduce) {
+  .blueprint-skeleton {
+    animation: none;
+  }
+  
+  .neon-glow-hover {
+    transition: none;
+  }
+}
+
+/* 深色模式優化（預設已是深色，但保留擴展性） */
+@media (prefers-color-scheme: dark) {
+  .blueprint-bg {
+    background-color: #0b0f19;
+  }
+}

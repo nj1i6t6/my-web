@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "home": "首頁",
+    "about": "關於我",
+    "skills": "專業技能",
+    "projects": "作品集",
+    "blog": "部落格",
+    "experience": "經歷",
+    "contact": "聯繫我"
+  },
+  "hero": {
+    "greeting": "你好，我是",
+    "name": "Simon Su",
+    "subtitle": "蘇柏誠",
+    "tagline": "從機械工程到 AI 開發，用技術為傳統產業注入創新能量。",
+    "ctaContact": "聯繫我",
+    "ctaProjects": "查看作品"
+  },
+  "about": {
+    "title": "關於我",
+    "subtitle": "About Me",
+    "experience": "3+ 年經驗",
+    "experienceDesc": "跨域實務累積",
+    "heading": "從機械到 AI，跨域創新的實踐者",
+    "intro1": "嗨！我是蘇柏誠 Simon，目前就讀屏東科技大學，一位從汽車機械跨足到 AI 與智慧農業的開發者。",
+    "intro2": "我獨立開發的「領頭羊博士」整合了 Google Gemini AI、IoT 自動化與可驗證帳本技術。",
+    "certificates": "專業證照",
+    "domains": "技術領域",
+    "projectsCount": "完整專案"
+  },
+  "skills": {
+    "title": "專業技能",
+    "subtitle": "Skills",
+    "frontend": "Frontend Development",
+    "backend": "Backend & AI Integration",
+    "devops": "DevOps & Infrastructure",
+    "security": "Security & Specialized Tech"
+  },
+  "projects": {
+    "title": "作品集",
+    "subtitle": "Projects",
+    "viewAll": "查看全部"
+  },
+  "experience": {
+    "title": "經歷",
+    "subtitle": "Experience"
+  },
+  "contact": {
+    "title": "聯繫我",
+    "subtitle": "Contact",
+    "heading": "讓我們聊聊",
+    "description": "無論您是想討論專案合作、工作機會，或只是想打個招呼，我都很樂意收到您的來信！",
+    "email": "Email",
+    "location": "位置",
+    "locationValue": "台灣",
+    "website": "網站",
+    "nameLabel": "姓名",
+    "namePlaceholder": "您的姓名",
+    "emailLabel": "Email",
+    "emailPlaceholder": "your{'@'}email.com",
+    "subjectLabel": "主旨",
+    "subjectPlaceholder": "想討論什麼？",
+    "messageLabel": "訊息",
+    "messagePlaceholder": "您的訊息...",
+    "submit": "發送訊息"
+  },
+  "blog": {
+    "title": "技術部落格",
+    "subtitle": "Blog",
+    "description": "分享機械工程到 AI 開發的跨域學習歷程"
+  },
+  "footer": {
+    "copyright": "© 2026 蘇柏誠 Simon Su. All rights reserved.",
+    "tagline": "打造優質的數位體驗"
+  },
+  "common": {
+    "loading": "載入中...",
+    "error": "發生錯誤",
+    "backToHome": "返回首頁",
+    "readMore": "閱讀更多"
+  }
+}

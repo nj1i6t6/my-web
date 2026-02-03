@@ -2,7 +2,41 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-02',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@nuxt/content',
+    '@nuxtjs/i18n',
+  ],
+
+  // Nuxt Content 配置
+  content: {
+    highlight: {
+      theme: 'github-dark',
+      preload: ['typescript', 'javascript', 'python', 'vue', 'bash']
+    },
+    markdown: {
+      toc: {
+        depth: 3,
+        searchDepth: 3
+      }
+    }
+  },
+
+  // i18n 多語言配置
+  i18n: {
+    locales: [
+      { code: 'zh-TW', iso: 'zh-TW', file: 'zh-TW.json', name: '繁體中文' },
+      { code: 'en', iso: 'en-US', file: 'en.json', name: 'English' }
+    ],
+    defaultLocale: 'zh-TW',
+    langDir: 'locales',
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root'
+    }
+  },
   
   app: {
     head: {
@@ -16,7 +50,7 @@ export default defineNuxtConfig({
         {
           'http-equiv': 'Content-Security-Policy',
           content:
-            "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://*.cloudflare.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://formspree.io https://cloudflareinsights.com https://challenges.cloudflare.com https://*.cloudflare.com; img-src 'self' data: https:; frame-src https://challenges.cloudflare.com https://*.cloudflare.com; worker-src 'self' blob:; form-action 'self' https://formspree.io;",
+            "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://*.cloudflare.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://formspree.io https://cloudflareinsights.com https://challenges.cloudflare.com https://*.cloudflare.com; img-src 'self' data: https:; frame-src https://challenges.cloudflare.com https://*.cloudflare.com; worker-src 'self' blob:; form-action 'self' https://formspree.io; manifest-src 'self';",
         },
         {
           name: 'description',
@@ -69,7 +103,7 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;700&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;700&family=JetBrains+Mono:wght@400;600;700&display=swap',
         },
         {
           rel: 'stylesheet',
@@ -91,19 +125,27 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    publicAssets: [
-      { dir: 'Image', baseURL: '/assets' },
-    ],
+    preset: 'cloudflare_pages', // 啟用 Cloudflare Pages Functions
     prerender: {
       crawlLinks: true,
-      routes: ['/', '/projects'],
+      routes: ['/', '/projects', '/contact', '/blog'], // 新增 /blog
     },
   },
   runtimeConfig: {
+    // Server-only（不會暴露到客戶端）
+    turnstileSecretKey: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '',
+    smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',
+    smtpPort: process.env.SMTP_PORT || '587',
+    smtpUser: process.env.SMTP_USER || '',
+    smtpPass: process.env.SMTP_PASS || '',
+    
     public: {
+      // 客戶端可訪問
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://bochengsu.com',
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
       formspreeEndpoint: process.env.NUXT_PUBLIC_FORMSPREE_ENDPOINT || '',
+      // Turnstile 測試金鑰 (always passes) - 生產環境請設定真實金鑰
+      turnstileSiteKey: process.env.CLOUDFLARE_TURNSTILE_SITEKEY || '1x00000000000000000000AA',
     },
   },
   routeRules: {

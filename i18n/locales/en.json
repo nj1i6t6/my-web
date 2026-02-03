@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "skills": "Skills",
+    "projects": "Projects",
+    "blog": "Blog",
+    "experience": "Experience",
+    "contact": "Contact"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "name": "Simon Su",
+    "subtitle": "Po-Cheng Su",
+    "tagline": "From Mechanical Engineering to AI Development, bringing innovation to traditional industries through technology.",
+    "ctaContact": "Contact Me",
+    "ctaProjects": "View Projects"
+  },
+  "about": {
+    "title": "About Me",
+    "subtitle": "About Me",
+    "experience": "3+ Years",
+    "experienceDesc": "Cross-domain Experience",
+    "heading": "From Mechanics to AI, A Cross-domain Innovator",
+    "intro1": "Hi! I'm Simon Su, currently studying at National Pingtung University of Science and Technology, a developer transitioning from automotive mechanics to AI and smart agriculture.",
+    "intro2": "My independently developed 'Dr. Shepherd' integrates Google Gemini AI, IoT automation, and verifiable ledger technology.",
+    "certificates": "Certifications",
+    "domains": "Tech Domains",
+    "projectsCount": "Projects"
+  },
+  "skills": {
+    "title": "Skills",
+    "subtitle": "Skills",
+    "frontend": "Frontend Development",
+    "backend": "Backend & AI Integration",
+    "devops": "DevOps & Infrastructure",
+    "security": "Security & Specialized Tech"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Projects",
+    "viewAll": "View All"
+  },
+  "experience": {
+    "title": "Experience",
+    "subtitle": "Experience"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Contact",
+    "heading": "Let's Talk",
+    "description": "Whether you want to discuss project collaboration, job opportunities, or just say hello, I'd love to hear from you!",
+    "email": "Email",
+    "location": "Location",
+    "locationValue": "Taiwan",
+    "website": "Website",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "your{'@'}email.com",
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "What would you like to discuss?",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Your message...",
+    "submit": "Send Message"
+  },
+  "blog": {
+    "title": "Tech Blog",
+    "subtitle": "Blog",
+    "description": "Sharing my journey from mechanical engineering to AI development"
+  },
+  "footer": {
+    "copyright": "© 2026 Simon Su. All rights reserved.",
+    "tagline": "Crafting Quality Digital Experiences"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "backToHome": "Back to Home",
+    "readMore": "Read More"
+  }
+}

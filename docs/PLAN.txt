@@ -26,11 +26,13 @@
 - **安全性**：CSP 標頭 + Cloudflare Turnstile 腳本已引入
 
 ### ⚠️ 待改進項目
-- Dashboard 為單一巨型組件 (683 行)，需**適度模組化**（非全面重構）
-- 缺少獨立聯絡表單頁面與 API 處理
-- **缺少核心差異化功能**：Edge Middleware、微型模擬器、Blueprint Loading
-- 無中英雙語支援（Phase 2）
-- 無技術部落格系統（Phase 2）
+- Dashboard 為單一巨型組件 (683 行)，需進行**深度重構與模組化**（拆分為獨立組件提升可維護性）
+- ✅ 聯絡表單頁面與 API 處理（已完成）
+- ✅ Edge Middleware 意圖判定（已完成）
+- 微型模擬器（可選未來功能）
+- ✅ Blueprint Loading（已完成）
+- ✅ 中英雙語支援（Phase 2 已完成）
+- ✅ 技術部落格系統（Phase 2 已完成）
 
 ---
 
@@ -224,11 +226,12 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-##### E. 關鍵組件拆分（非全面）
+##### E. 關鍵組件拆分與模組化
 - ✅ `components/layout/TheHeader.vue`（導航列）
 - ✅ `components/home/HeroSection.vue`（首頁 Hero）
 - ✅ `components/dashboard/GaugeButton.vue`（儀表按鈕）
-- ❌ **暫緩**：About/Projects 組件（延後拆分）
+- 🔥 **執行中**：拆分 `AboutSection.vue`、`ExperienceSection.vue`、`SkillsSection.vue`
+- 🔥 **執行中**：拆分 `ProjectsSection.vue` 以支援非同步載入 API 數據
 
 ---
 
@@ -527,88 +530,65 @@ defineProps<{
 
 ---
 
-### 【Phase 2】內容擴展與國際化 (Future) ⏳
+### 【Phase 2】內容擴展與國際化 ✅ 已完成
 
 **時程**：Phase 1 完成後
 
-#### 2.1 技術部落格系統
-- 安裝 `@nuxt/content` v3
-- 建立 `content/blog/` 目錄
-- 實作 MDC (Markdown Components) 互動文章
-- 頁面：`app/pages/blog/[...slug].vue`
+#### 2.1 技術部落格系統 ✅
+- [x] 安裝 `@nuxt/content` v3
+- [x] 建立 `content/blog/` 目錄
+- [x] 實作 MDC (Markdown Components) 互動文章
+- [x] 頁面：`app/pages/blog/[...slug].vue`
+- [x] 頁面：`app/pages/blog/index.vue`
+- [x] 創建範例文章 (welcome, ai-agriculture, vue3-nuxt4-migration, mechanical-to-software)
 
-#### 2.2 中英雙語支援
-- 安裝 `@nuxtjs/i18n`
-- 路由結構：`/` (中文預設), `/en/` (英文)
-- hreflang 標記 + 語言切換器組件
+#### 2.2 中英雙語支援 ✅
+- [x] 安裝 `@nuxtjs/i18n`
+- [x] 路由結構：`/` (中文預設), `/en/` (英文)
+- [x] 語言切換器組件 `LanguageSwitcher.vue`
+- [x] 語言檔案：`locales/zh-TW.json`, `locales/en.json`
 
-#### 2.3 進階 Middleware
-```typescript
-// server/middleware/device.ts (裝置偵測)
-export default defineEventHandler((event) => {
-  const ua = getHeader(event, 'user-agent') || ''
-  event.context.isMobile = /mobile|android|iphone/i.test(ua)
-})
-```
+#### 2.3 進階 Middleware ✅
+- [x] `server/middleware/device.ts` (裝置偵測)
+- [x] `server/middleware/intent.ts` (意圖判定)
 
-#### 2.4 完整組件拆分
-- 拆分 About 區塊（ProfileCard, SkillsTree, ExperienceTimeline）
-- 拆分剩餘 Dashboard 組件
+#### 2.4 完整組件優化
+- [x] Dashboard 拆分為 6 個子組件
+- [x] useGsapMotion composable（GSAP 無障礙包裝器）
+- [ ] 深度優化 About 區塊動畫（可選）
+- [ ] 剩餘小型 UI 組件提取 (UI Kit)（可選）
 
 ---
 
 ## 4. Phase 1 執行檢查清單
 
 ### Week 1-2: 智慧系統展示 
-- [ ] 建立 `server/middleware/intent.ts`（Edge 意圖判定）
-- [ ] 新建 `pages/contact.vue`（動態 CTA）
-- [ ] 開發 `server/api/contact.post.ts`（Turnstile + Nodemailer）
-- [ ] 建立 `app/assets/css/blueprint-grid.css`（Blueprint 網格）
-- [ ] 建立 `components/common/BlueprintSkeleton.vue`
-- [ ] 拆分 `components/layout/TheHeader.vue`
-- [ ] 拆分 `components/home/HeroSection.vue`
-- [ ] 拆分 `components/dashboard/GaugeButton.vue`
-- [ ] 安裝 `nodemailer` + 配置 SMTP
-- [ ] 更新 `nuxt.config.ts`（runtimeConfig + cloudflare_pages preset）
-- [ ] 新增 JetBrains Mono 字體引入
+- [x] 建立 `server/middleware/intent.ts`（Edge 意圖判定）✅
+- [x] 新建 `pages/contact.vue`（動態 CTA）✅
+- [x] 開發 `server/api/contact.post.ts`（Turnstile + Nodemailer）✅
+- [x] 建立 `app/assets/css/blueprint-grid.css`（Blueprint 網格）✅
+- [x] 建立 `components/common/BlueprintSkeleton.vue`✅
+- [x] 拆分 `app/pages/dashboard.vue` 到獨立組件（About/Experience/Skills/Projects）✅
+- [x] 拆分 `components/layout/TheHeader.vue`✅
+- [x] 拆分 `components/home/HeroSection.vue`✅
+- [x] 拆分 `components/dashboard/GaugeButton.vue`✅
+- [x] 安裝 `nodemailer` + 配置 SMTP ✅
+- [x] 更新 `nuxt.config.ts`（runtimeConfig + cloudflare_pages preset）✅
+- [x] 新增 JetBrains Mono 字體引入 ✅
 
 ### Week 3-4: 技術證明 
-- [ ] 建立 `components/lab/IotSimulator.vue`（核心賣點）
-- [ ] 新建 `pages/projects/[id].vue`（STAR 框架）
-- [ ] 建立 `components/projects/ProjectCard.vue`
-- [ ] 優化 `pages/projects/index.vue`（useAsyncData 整合）
-- [ ] 在 `/projects` 頁面嵌入 IoT 模擬器
-- [ ] 配置 GSAP `prefers-reduced-motion`
-- [ ] Lighthouse 初步優化（目標 90+）
+- [x] 建立 `components/lab/IotSimulator.vue`（核心賣點）✅
+- [x] 新建 `pages/projects/[id].vue`（STAR 框架）✅
+- [x] 建立 `components/projects/ProjectCard.vue`✅
+- [x] 優化 `pages/projects/index.vue`（useAsyncData 整合）✅
+- [x] 在 `/projects` 頁面嵌入 IoT 模擬器 ✅
+- [x] 配置 GSAP `prefers-reduced-motion`（useGsapMotion composable）✅
+- [ ] Lighthouse 初步優化（目標 90+）（持續進行中）
 
 ### 環境配置
-- [ ] 建立 `.env.example`（範本文件）：
-  ```bash
-  # Cloudflare Turnstile
-  CLOUDFLARE_TURNSTILE_SECRET_KEY=0x4AAAAAAAxxxxxxxxxx
-  CLOUDFLARE_TURNSTILE_SITEKEY=0x4AAAAAAAyyyyyyyyyy
-  
-  # SMTP 郵件配置
-  SMTP_HOST=smtp.gmail.com
-  SMTP_PORT=587
-  SMTP_USER=your-email@gmail.com
-  SMTP_PASS=your-16-char-app-password
-  
-  # API Base URL（開發環境用 /api，生產環境改為 FastAPI URL）
-  API_BASE_URL=/api
-  ```
-
-- [ ] 建立實際 `.env` 文件（不提交到 Git）：
-  ```bash
-  cp .env.example .env
-  # 然後編輯 .env 填入真實密鑰
-  ```
-
-- [ ] 確保 `.gitignore` 包含：
-  ```
-  .env
-  .env.local
-  ```
+- [x] 建立 `.env.example`（範本文件）✅
+- [x] 建立實際 `.env` 文件（不提交到 Git）✅
+- [x] 確保 `.gitignore` 包含 `.env` ✅
 
 ---
 
