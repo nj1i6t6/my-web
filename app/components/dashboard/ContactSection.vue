@@ -52,7 +52,7 @@
       <form
         class="rounded-3xl border border-white/10 bg-slate-900/60 p-6"
         id="contact-form"
-        action="https://formspree.io/f/mojwjkvp"
+        :action="formspreeAction"
         method="POST"
       >
         <div class="grid gap-4">
@@ -92,7 +92,7 @@
             class="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-white/40"
           ></textarea>
           <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" />
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAACVKfkMQ9HT-AJPq" data-theme="auto"></div>
+          <div class="cf-turnstile" :data-sitekey="turnstileSiteKey" data-theme="auto"></div>
           <button
             type="submit"
             class="inline-flex items-center justify-center gap-2 rounded-full bg-neon-green/20 px-6 py-3 text-sm font-semibold text-neon-green shadow-neon-green transition hover:bg-neon-green/30"
@@ -108,4 +108,7 @@
 
 <script setup lang="ts">
 // Contact Section - 聯絡表單區塊
+const config = useRuntimeConfig()
+const formspreeAction = computed(() => config.public.formspreeEndpoint || 'https://formspree.io/f/mojwjkvp')
+const turnstileSiteKey = computed(() => config.public.turnstileSiteKey || '')
 </script>

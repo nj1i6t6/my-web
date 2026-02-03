@@ -22,8 +22,7 @@
           min="0" 
           max="50" 
           step="1"
-          class="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700"
-          style="accent-color: #00ff88"
+          class="range-accent mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700"
         />
         <div class="mt-1 flex justify-between text-xs text-white/40">
           <span>0°C</span>
@@ -46,8 +45,7 @@
           min="0" 
           max="100" 
           step="1"
-          class="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700"
-          style="accent-color: #00ff88"
+          class="range-accent mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700"
         />
         <div class="mt-1 flex justify-between text-xs text-white/40">
           <span>0%</span>
@@ -155,6 +153,10 @@ const suggestionClass = computed(() => {
 
 <style scoped>
 /* 自定義滑桿樣式 */
+.range-accent {
+  accent-color: #00ff88;
+}
+
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 20px;

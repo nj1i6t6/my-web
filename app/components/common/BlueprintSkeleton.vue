@@ -1,11 +1,7 @@
 <template>
   <div 
     class="blueprint-skeleton" 
-    :style="{ 
-      width: width || '100%', 
-      height: height || '200px',
-      minHeight: minHeight || 'auto'
-    }"
+    :class="[widthClass, heightClass, minHeightClass]"
   >
     <!-- Blueprint 網格背景層 -->
     <div class="absolute inset-0 blueprint-bg opacity-50"></div>
@@ -44,14 +40,48 @@ interface Props {
   showLabel?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   width: '100%',
   height: '200px',
   minHeight: 'auto',
   showLabel: false
 })
+
+const heightClass = computed(() => {
+  switch (props.height) {
+    case '300px':
+      return 'height-300'
+    case '600px':
+      return 'height-600'
+    case '200px':
+    default:
+      return 'height-200'
+  }
+})
+
+const widthClass = computed(() => (props.width === '100%' ? 'width-full' : 'width-full'))
+const minHeightClass = computed(() => (props.minHeight === 'auto' ? 'min-height-auto' : 'min-height-auto'))
 </script>
 
 <style scoped>
 /* 組件內部樣式由 blueprint-grid.css 提供 */
+.width-full {
+  width: 100%;
+}
+
+.min-height-auto {
+  min-height: auto;
+}
+
+.height-200 {
+  height: 200px;
+}
+
+.height-300 {
+  height: 300px;
+}
+
+.height-600 {
+  height: 600px;
+}
 </style>

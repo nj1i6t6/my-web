@@ -1,6 +1,7 @@
-// @ts-nocheck
 import nodemailer from 'nodemailer'
 import type { H3Event } from 'h3'
+import { createError, getHeader, readRawBody } from 'h3'
+import { escapeHtml, getClientIp, isAllowedOrigin, MAX_CONTACT_BODY_BYTES } from '../utils/security'
 
 /**
  * Contact API - 聯絡表單處理
@@ -20,20 +21,66 @@ interface ContactBody {
   token: string // Turnstile token
 }
 
-// 簡易記憶體快取（Rate Limiting）
-const rateLimitCache = new Map<string, number>()
-const RATE_LIMIT_WINDOW = 60 * 60 * 1000 // 1 小時
-const MAX_REQUESTS_PER_WINDOW = 3 // 每小時最多 3 次
-
 export default defineEventHandler(async (event: H3Event) => {
-  const body = await readBody<ContactBody>(event)
   const config = useRuntimeConfig(event)
+  const origin = getHeader(event, 'origin') || getHeader(event, 'referer')
+  if (!isAllowedOrigin(origin, config.public.siteUrl)) {
+    throw createError({
+      statusCode: 403,
+      message: 'Forbidden origin',
+    })
+  }
+
+  const rawBody = await readRawBody(event, false)
+  if (!rawBody) {
+    throw createError({
+      statusCode: 400,
+      message: '請提供請求內容',
+    })
+  }
+  if (rawBody.length > MAX_CONTACT_BODY_BYTES) {
+    throw createError({
+      statusCode: 413,
+      message: '請求內容過大',
+    })
+  }
+
+  let body: ContactBody
+  try {
+    body = JSON.parse(rawBody) as ContactBody
+  } catch {
+    throw createError({
+      statusCode: 400,
+      message: 'JSON 格式不正確',
+    })
+  }
   
   // 1. 基礎驗證
-  if (!body.name || !body.email || !body.message || !body.token) {
+  if (!body?.name || !body?.email || !body?.message || !body?.token) {
     throw createError({
       statusCode: 400,
       message: '請填寫所有必填欄位'
+    })
+  }
+
+  if (body.name.length < 2 || body.name.length > 50) {
+    throw createError({
+      statusCode: 400,
+      message: '姓名長度不正確'
+    })
+  }
+
+  if (body.message.length < 5 || body.message.length > 2000) {
+    throw createError({
+      statusCode: 400,
+      message: '訊息內容長度不正確'
+    })
+  }
+
+  if (body.token.length < 10 || body.token.length > 2000) {
+    throw createError({
+      statusCode: 400,
+      message: 'CAPTCHA Token 不正確'
     })
   }
   
@@ -73,34 +120,12 @@ export default defineEventHandler(async (event: H3Event) => {
     })
   }
   
-  // 4. Rate Limiting（簡易版）
-  const clientIP = getHeader(event, 'x-forwarded-for') || 
-                   getHeader(event, 'x-real-ip') || 
-                   'unknown'
-  
-  const now = Date.now()
-  const lastRequestTime = rateLimitCache.get(clientIP) || 0
-  
-  if (now - lastRequestTime < RATE_LIMIT_WINDOW) {
-    throw createError({
-      statusCode: 429,
-      message: '請求過於頻繁，請稍後再試'
-    })
-  }
-  
-  rateLimitCache.set(clientIP, now)
-  
-  // 清理過期快取（每 100 次請求清理一次）
-  if (rateLimitCache.size > 100) {
-    for (const [ip, time] of rateLimitCache.entries()) {
-      if (now - time > RATE_LIMIT_WINDOW) {
-        rateLimitCache.delete(ip)
-      }
-    }
-  }
-  
   // 5. 發送郵件
   try {
+    const clientIP = getClientIp(event)
+    const safeName = escapeHtml(body.name)
+    const safeEmail = escapeHtml(body.email)
+    const safeMessage = escapeHtml(body.message)
     const transporter = nodemailer.createTransport({
       host: config.smtpHost,
       port: Number(config.smtpPort) || 587,
@@ -115,13 +140,13 @@ export default defineEventHandler(async (event: H3Event) => {
     const mailOptions = {
       from: `"Portfolio Contact" <${config.smtpUser}>`,
       to: config.smtpUser,
-      subject: `🔔 Portfolio 聯絡表單：${body.name}`,
+      subject: `🔔 Portfolio 聯絡表單：${safeName}`,
       text: `
-姓名：${body.name}
-Email：${body.email}
+姓名：${safeName}
+Email：${safeEmail}
 
 訊息內容：
-${body.message}
+${safeMessage}
 
 ---
 發送時間：${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}
@@ -134,13 +159,13 @@ ${body.message}
           </h2>
           
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>姓名：</strong> ${body.name}</p>
-            <p><strong>Email：</strong> <a href="mailto:${body.email}">${body.email}</a></p>
+            <p><strong>姓名：</strong> ${safeName}</p>
+            <p><strong>Email：</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
           </div>
           
           <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
             <h3 style="margin-top: 0;">訊息內容：</h3>
-            <p style="white-space: pre-wrap;">${body.message}</p>
+            <p style="white-space: pre-wrap;">${safeMessage}</p>
           </div>
           
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">

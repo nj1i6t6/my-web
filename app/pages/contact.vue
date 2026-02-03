@@ -293,6 +293,7 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const turnstileContainer = ref<HTMLElement | null>(null)
 const turnstileToken = ref('')
+const csrfToken = useCookie('csrf-token')
 
 // 模式切換
 const toggleMode = () => {
@@ -308,6 +309,14 @@ onMounted(() => {
         turnstileToken.value = token
       },
       theme: 'dark'
+    })
+  }
+
+  if (!csrfToken.value) {
+    $fetch('/api/csrf').then((response) => {
+      csrfToken.value = response.token
+    }).catch(() => {
+      // ignore
     })
   }
 })
@@ -326,8 +335,16 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
+    if (!csrfToken.value) {
+      const csrfResponse = await $fetch('/api/csrf')
+      csrfToken.value = csrfResponse.token
+    }
+
     const response = await $fetch('/api/contact', {
       method: 'POST',
+      headers: {
+        'x-csrf-token': csrfToken.value || ''
+      },
       body: {
         name: formData.value.name,
         email: formData.value.email,

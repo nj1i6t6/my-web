@@ -1,7 +1,7 @@
 // @ts-nocheck
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-02',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/content',
@@ -47,11 +47,6 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        {
-          'http-equiv': 'Content-Security-Policy',
-          content:
-            "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://*.cloudflare.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://formspree.io https://cloudflareinsights.com https://challenges.cloudflare.com https://*.cloudflare.com; img-src 'self' data: https:; frame-src https://challenges.cloudflare.com https://*.cloudflare.com; worker-src 'self' blob:; form-action 'self' https://formspree.io; manifest-src 'self';",
-        },
         {
           name: 'description',
           content:
@@ -99,16 +94,6 @@ export default defineNuxtConfig({
         { rel: 'canonical', href: 'https://bochengsu.com/' },
         { rel: 'alternate', hreflang: 'zh-TW', href: 'https://bochengsu.com/' },
         { rel: 'alternate', hreflang: 'x-default', href: 'https://bochengsu.com/' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;700&family=JetBrains+Mono:wght@400;600;700&display=swap',
-        },
-        {
-          rel: 'stylesheet',
-          href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css',
-        },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
@@ -133,19 +118,21 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     // Server-only（不會暴露到客戶端）
-    turnstileSecretKey: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '',
+    turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY || '',
     smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',
     smtpPort: process.env.SMTP_PORT || '587',
     smtpUser: process.env.SMTP_USER || '',
     smtpPass: process.env.SMTP_PASS || '',
+    projectWriteKey: process.env.PROJECT_WRITE_KEY || '',
+    enableProjectWrite: process.env.ENABLE_PROJECT_WRITE === 'true',
     
     public: {
       // 客戶端可訪問
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://bochengsu.com',
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
       formspreeEndpoint: process.env.NUXT_PUBLIC_FORMSPREE_ENDPOINT || '',
-      // Turnstile 測試金鑰 (always passes) - 生產環境請設定真實金鑰
-      turnstileSiteKey: process.env.CLOUDFLARE_TURNSTILE_SITEKEY || '1x00000000000000000000AA',
+      // Turnstile Site Key（生產環境必填）
+      turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
     },
   },
   routeRules: {
